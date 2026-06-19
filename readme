@@ -1,0 +1,93 @@
+# CodeAlpha_EventRegistration
+
+An Event Registration System backend built with Flask and SQLite, as part of the CodeAlpha Backend Development Internship (Task 2).
+
+## Features
+
+- Create and view events (title, date, location, description, capacity)
+- Register for events with name and email
+- Prevents duplicate registrations and overbooking (capacity limit)
+- View and cancel your registrations by email
+- Delete events (cascades to remove their registrations)
+- Simple tabbed frontend: Browse Events, Create Event, My Registrations
+
+## Tech Stack
+
+- **Backend:** Flask (Python)
+- **Database:** SQLite (via Flask-SQLAlchemy)
+- **Frontend:** HTML, CSS, JavaScript
+
+## Project Structure
+
+```
+CodeAlpha_EventRegistration/
+├── app.py
+├── requirements.txt
+├── templates/
+│   └── index.html
+└── README.md
+```
+
+## Setup & Run
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/<your-username>/CodeAlpha_EventRegistration.git
+   cd CodeAlpha_EventRegistration
+   ```
+
+2. Create a virtual environment (optional but recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # On Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Run the app:
+   ```bash
+   python app.py
+   ```
+
+5. Open your browser at `http://127.0.0.1:5000/`
+
+## API Endpoints
+
+| Method | Endpoint                              | Description                                |
+|--------|----------------------------------------|---------------------------------------------|
+| GET    | `/api/events`                          | List all events with registration counts    |
+| POST   | `/api/events`                          | Create a new event                           |
+| GET    | `/api/events/<id>`                     | Get a single event's details                 |
+| DELETE | `/api/events/<id>`                     | Delete an event (and its registrations)      |
+| POST   | `/api/events/<id>/register`            | Register for an event                        |
+| GET    | `/api/registrations?email=<email>`     | List registrations for a given email         |
+| POST   | `/api/registrations/<id>/cancel`       | Cancel a registration                        |
+| DELETE | `/api/registrations/<id>`              | Permanently delete a registration            |
+
+### Example: Create Event
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/events \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Tech Fest 2026", "date": "2026-07-20", "location": "VVCE Auditorium, Mysuru", "capacity": 100, "description": "Annual tech fest"}'
+```
+
+### Example: Register for Event
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/events/1/register \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Yukthi", "email": "yukthi@example.com"}'
+```
+
+## Database Models
+
+- **Event**: `id`, `title`, `description`, `date`, `location`, `capacity`, `created_at`
+- **Registration**: `id`, `event_id` (FK → Event), `name`, `email`, `status` (`confirmed`/`cancelled`), `registered_at`
+
+## Author
+
+Built as part of the CodeAlpha Backend Development Internship — Task 2: Event Registration System.

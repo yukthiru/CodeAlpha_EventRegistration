@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Registration System</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        min-height: 100vh;
+        padding: 30px 15px;
+    }
+    .wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    h1 {
+        text-align: center;
+        color: #fff;
+        margin-bottom: 6px;
+        font-size: 32px;
+        text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .subtitle {
+        text-align: center;
+        color: #eafff3;
+        margin-bottom: 24px;
+        font-size: 14px;
+    }
+    .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .tab-btn {
+        padding: 10px 22px;
+        border: none;
+        border-radius: 30px;
+        background: rgba(255,255,255,0.25);
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s;
+    }
+    .tab-btn.active {
+        background: #fff;
+        color: #11998e;
+    }
+    .panel {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        padding: 30px;
+        display: none;
+    }
+    .panel.active { display: block; }
+    .panel h2 {
+        color: #333;
+        margin-bottom: 18px;
+        font-size: 20px;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+    .form-row.single { grid-template-columns: 1fr; }
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 11px 13px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        font-family: inherit;
+        transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus { border-color: #11998e; }
+    .btn {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn.small { padding: 8px 14px; font-size: 12px; }
+    .btn.danger { background: linear-gradient(135deg, #ff5858 0%, #f857a6 100%); }
+    .btn.secondary { background: #6c757d; }
+
+    .msg {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        display: none;
+    }
+    .msg.show { display: block; }
+    .msg.success { background: #e6f9f0; color: #11998e; }
+    .msg.error { background: #fdecea; color: #c0392b; }
+
+    .event-card {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 14px;
+    }
+    .event-card h3 {
+        color: #333;
+        margin-bottom: 6px;
+        font-size: 17px;
+    }
+    .event-card .meta {
+        font-size: 13px;
+        color: #888;
+        margin-bottom: 8px;
+    }
+    .event-card .desc {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+    .event-card .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .spots {
+        font-size: 12px;
+        font-weight: 600;
+        color: #11998e;
+        background: #e6f9f0;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+    .spots.full {
+        color: #c0392b;
+        background: #fdecea;
+    }
+
+    .reg-form {
+        display: none;
+        margin-top: 12px;
+        border-top: 1px dashed #eee;
+        padding-top: 12px;
+    }
+    .reg-form.show { display: block; }
+
+    .reg-item {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .reg-item .info strong { color: #333; }
+    .reg-item .info .ev { font-size: 12px; color: #888; }
+    .status-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+    .status-badge.confirmed { background: #e6f9f0; color: #11998e; }
+    .status-badge.cancelled { background: #f0f0f0; color: #999; }
+
+    .empty {
+        text-align: center;
+        color: #aaa;
+        font-size: 14px;
+        padding: 30px 0;
+    }
+</style>
+</head>
+<body>
+<div class="wrapper">
+    <h1>🎟 Event Registration System</h1>
+    <p class="subtitle">Browse events, register, and manage your bookings</p>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="browse">Browse Events</button>
+        <button class="tab-btn" data-tab="create">Create Event</button>
+        <button class="tab-btn" data-tab="mine">My Registrations</button>
+    </div>
+
+    <!-- Browse Events -->
+    <div class="panel active" id="browse">
+        <h2>Upcoming Events</h2>
+        <div id="eventsList"></div>
+    </div>
+
+    <!-- Create Event -->
+    <div class="panel" id="create">
+        <h2>Create a New Event</h2>
+        <form id="eventForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Event Title</label>
+                    <input type="text" id="evTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="evDate" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="evLocation" required>
+                </div>
+                <div class="form-group">
+                    <label>Capacity (0 = unlimited)</label>
+                    <input type="number" id="evCapacity" min="0" value="0">
+                </div>
+            </div>
+            <div class="form-row single">
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="evDescription" rows="3"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn">Create Event</button>
+            <div class="msg" id="createMsg"></div>
+        </form>
+    </div>
+
+    <!-- My Registrations -->
+    <div class="panel" id="mine">
+        <h2>My Registrations</h2>
+        <div class="form-row single">
+            <div class="form-group">
+                <label>Enter your email to view registrations</label>
+                <input type="email" id="lookupEmail" placeholder="you@example.com">
+            </div>
+        </div>
+        <button class="btn" id="lookupBtn">View Registrations</button>
+        <div id="registrationsList" style="margin-top:16px;"></div>
+    </div>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.tab-btn');
+const panels = document.querySelectorAll('.panel');
+
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+        if (tab.dataset.tab === 'browse') loadEvents();
+    });
+});
+
+// ---------- Load & render events ----------
+async function loadEvents() {
+    const res = await fetch('/api/events');
+    const events = await res.json();
+    const container = document.getElementById('eventsList');
+    container.innerHTML = '';
+
+    if (events.length === 0) {
+        container.innerHTML = '<div class="empty">No events yet. Create one in the "Create Event" tab.</div>';
+        return;
+    }
+
+    events.forEach(ev => {
+        const card = document.createElement('div');
+        card.className = 'event-card';
+
+        let spotsHtml = '';
+        if (ev.capacity) {
+            const full = ev.spots_left <= 0;
+            spotsHtml = `<span class="spots ${full ? 'full' : ''}">${full ? 'Fully booked' : ev.spots_left + ' spots left'}</span>`;
+        } else {
+            spotsHtml = `<span class="spots">${ev.registered_count} registered</span>`;
+        }
+
+        card.innerHTML = `
+            <h3>${ev.title}</h3>
+            <div class="meta">📅 ${ev.date} &nbsp;|&nbsp; 📍 ${ev.location}</div>
+            <div class="desc">${ev.description || ''}</div>
+            <div class="footer">
+                ${spotsHtml}
+                <div>
+                    <button class="btn small" onclick="toggleRegForm(${ev.id})">Register</button>
+                    <button class="btn small danger" onclick="deleteEvent(${ev.id})">Delete</button>
+                </div>
+            </div>
+            <div class="reg-form" id="regform-${ev.id}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" id="name-${ev.id}">
+                    </div>
+                    <div class="form-group">
+                        <label>Your Email</label>
+                        <input type="email" id="email-${ev.id}">
+                    </div>
+                </div>
+                <button class="btn small" onclick="registerForEvent(${ev.id})">Submit Registration</button>
+                <div class="msg" id="regmsg-${ev.id}"></div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function toggleRegForm(eventId) {
+    const form = document.getElementById(`regform-${eventId}`);
+    form.classList.toggle('show');
+}
+
+async function registerForEvent(eventId) {
+    const name = document.getElementById(`name-${eventId}`).value.trim();
+    const email = document.getElementById(`email-${eventId}`).value.trim();
+    const msgBox = document.getElementById(`regmsg-${eventId}`);
+
+    const res = await fetch(`/api/events/${eventId}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+    });
+    const data = await res.json();
+
+    msgBox.classList.remove('success', 'error');
+    if (!res.ok) {
+        msgBox.textContent = data.error;
+        msgBox.classList.add('show', 'error');
+    } else {
+        msgBox.textContent = 'Registered successfully!';
+        msgBox.classList.add('show', 'success');
+        loadEvents();
+    }
+}
+
+async function deleteEvent(eventId) {
+    if (!confirm('Delete this event and all its registrations?')) return;
+    await fetch(`/api/events/${eventId}`, { method: 'DELETE' });
+    loadEvents();
+}
+
+// ---------- Create event ----------
+document.getElementById('eventForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+        title: document.getElementById('evTitle').value,
+        date: document.getElementById('evDate').value,
+        location: document.getElementById('evLocation').value,
+        capacity: document.getElementById('evCapacity').value,
+        description: document.getElementById('evDescription').value
+    };
+
+    const res = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    const msgBox = document.getElementById('createMsg');
+
+    msgBox.classList.remove('success', 'error');
+    if (!res.ok) {
+        msgBox.textContent = data.error;
+        msgBox.classList.add('show', 'error');
+    } else {
+        msgBox.textContent = 'Event created successfully!';
+        msgBox.classList.add('show', 'success');
+        document.getElementById('eventForm').reset();
+    }
+});
+
+// ---------- My registrations ----------
+document.getElementById('lookupBtn').addEventListener('click', async () => {
+    const email = document.getElementById('lookupEmail').value.trim();
+    if (!email) return;
+
+    const res = await fetch(`/api/registrations?email=${encodeURIComponent(email)}`);
+    const regs = await res.json();
+    const container = document.getElementById('registrationsList');
+    container.innerHTML = '';
+
+    if (regs.length === 0) {
+        container.innerHTML = '<div class="empty">No registrations found for this email.</div>';
+        return;
+    }
+
+    regs.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'reg-item';
+        item.innerHTML = `
+            <div class="info">
+                <strong>${r.event_title}</strong>
+                <div class="ev">${r.email}</div>
+            </div>
+            <span class="status-badge ${r.status}">${r.status}</span>
+            ${r.status === 'confirmed' ? `<button class="btn small danger" onclick="cancelRegistration(${r.id}, '${email}')">Cancel</button>` : ''}
+        `;
+        container.appendChild(item);
+    });
+});
+
+async function cancelRegistration(regId, email) {
+    await fetch(`/api/registrations/${regId}/cancel`, { method: 'POST' });
+    document.getElementById('lookupBtn').click();
+}
+
+loadEvents();
+</script>
+</body>
+</html>
