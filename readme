@@ -88,6 +88,3 @@ curl -X POST http://127.0.0.1:5000/api/events/1/register \
 - **Event**: `id`, `title`, `description`, `date`, `location`, `capacity`, `created_at`
 - **Registration**: `id`, `event_id` (FK → Event), `name`, `email`, `status` (`confirmed`/`cancelled`), `registered_at`
 
-## Author
-
-Built as part of the CodeAlpha Backend Development Internship — Task 2: Event Registration System.
